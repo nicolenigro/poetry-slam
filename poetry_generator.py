@@ -1,0 +1,251 @@
+"""
+M6: Poetry Slam
+CSCI 3725
+Nicole Nigro
+4/5/21
+
+Dependencies: glob, os, random, syllapy
+
+TODO: 
+* add more to inspiring set
+* incorporate things from 3 scholarly articles (and write about in README)
+* incorporate 4Ps (process, person) and creativity theory
+* export poem
+* display poem on the screen
+* incorporate methods for evaluating the poetry
+
+FIXES:
+* punctuation cleaning of poems in inspiring set
+* fix if statements in write_line_x functions so that syllable counts match 5/7/5/7/7 syllable pattern
+* voice of poem performer
+
+TANKA INFO
+Third line is a turn/pivotal image, which marks the transition from the examination of an image
+to the examination of the personal response.
+
+TANKA RECIPE
+Start with two lines addressing the experience of the poet, what they saw, heard, felt, tasted, smelled etc.
+Add a third line (called the turn or pivot) which changes the tone of the poem. It should relate separately to the two lines above and below.
+Finish with two lines which express a profound transcendental meaning that prompts reflection.
+
+In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
+a tanka to a woman the day after a date, and she would reply in kind. These were short messages (like secret letters) expressing love,
+desire, meaning, or gratitude. These poems often culminated in a transcendental message. Because tanka poems are meant to be given to
+someone, they are written from the viewpoint of the poet. That does not mean they must be written in the first person, but the poet is
+ever-present, always writing to express personal feelings about the subject. Like any constrained poem, lines should not begin with
+articles (e.g., “a” or “the”) because articles reduce poetic compression and weaken the poetic impact of the form. In terms of content,
+the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood. Traditionally, tanka has
+addressed a limited number of themes, from seasons to love to travel to death, but contemporary tanka has tackled a much wider range of topics
+within the age-old form.
+"""
+
+import glob, os, random, syllapy
+
+class Tanka():
+    def __init__(self):
+        """
+        Initializes a Tanka object with 5 lines (since it's a 5 line poem with a 5-7-5-7-7 syllable pattern),
+        a last_words tuple, a ngrams dictionary, and an all_words list.
+        Args: 
+            None
+        Return:
+            None
+        """
+        self.line_1 = ""
+        self.line_2 = ""
+        self.line_3 = ""
+        self.line_4 = ""
+        self.line_5 = ""
+        self.last_words = ()
+        self.ngrams = dict()
+        self.all_words = []
+    
+    def read_files(self, directory):
+        """
+        Read in the files from the inspiring set.
+        Arg:
+            directory (str): name of directory the inspiring set of poems are in
+        Return:
+            None
+        """
+        for filename in glob.glob(directory):
+            with open(os.path.join(filename), encoding='utf-8') as f:
+                poem_words = []
+                for word in f.read().split():
+                    cleaned_word = word.lower().replace("&", "and").replace("--", "").replace(",", "").replace(
+                        ".", "").replace("!", "").replace("?", "").replace(";", "").replace(":", "")
+                    self.all_words.append(cleaned_word)
+                    poem_words.append(cleaned_word)
+                self.create_ngrams(poem_words)
+
+    def create_ngrams(self, words):
+        """
+        Creates 2-word ngrams.
+        Arg:
+            words (list): list of words in a poem
+        Return:
+            ngrams (dict): 2-word ngrams and the words that follow after and their frequencies
+        """
+        for i in range(len(words)-2):
+            ngram = (words[i], words[i+1])
+            next_word = words[i+2]
+            if ngram in self.ngrams and next_word in self.ngrams[ngram]:
+                self.ngrams[ngram][next_word] += 1
+            elif ngram in self.ngrams:
+                self.ngrams[ngram][next_word] = 1
+            else:
+                self.ngrams[ngram] = dict()
+                self.ngrams[ngram][next_word] = 1
+        return self.ngrams
+
+    def syllables(self, word):
+        """
+        Counts the number of syllables in a word.
+        Arg:
+            word (str): the word
+        Return:
+            word_syllables (int): the number of syllables in the word
+        """
+        word_syllables = syllapy.count(word)
+        return word_syllables
+    
+    def get_next_word(self, word_pair):
+        """
+        Gets the next word based on the frequencies of the words following the current pair of words.
+        Arg:
+            word_pair (tuple): the current pair of words
+        Return:
+            next_word (str): the word chosen to follow next in the poem
+        """
+        if word_pair in self.ngrams:
+            word_options = list(self.ngrams[word_pair].keys())
+            word_frequencies = [self.ngrams[word_pair][i] for i in word_options]
+            next_word = random.choices(population=word_options, weights=word_frequencies, k=1)[0]
+        else:
+            word_index = random.randint(0, len(self.all_words)-1)
+            next_word = self.all_words[word_index]
+        return next_word
+
+    def write_kaminoku(self, current_pair):
+        """
+        Writes the first 3 parts of a tanka in 5-7-5 syllable pattern.
+        Args:
+            current_pair (tuple): the current pair of words used to start writing the kami-no-ku
+        Return:
+            None
+        """
+        self.line_1 += current_pair[0] + " " + current_pair[1] + " "
+        syllable_count = self.syllables(str(current_pair))
+
+        while syllable_count < 5:
+            next_word = self.get_next_word(current_pair)
+            word_syllables = self.syllables(next_word)
+
+            if (word_syllables + syllable_count) > 5:
+                next_word = self.get_next_word(current_pair)
+            
+            self.line_1 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+            syllable_count += word_syllables
+
+        syllable_count = 0
+
+        while syllable_count < 7:
+            next_word = self.get_next_word(current_pair)
+            word_syllables = self.syllables(next_word)
+
+            if (word_syllables + syllable_count) > 7:
+                next_word = self.get_next_word(current_pair)
+            
+            self.line_2 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+            syllable_count += word_syllables
+
+        syllable_count = 0
+
+        while syllable_count < 5:
+            next_word = self.get_next_word(current_pair)
+            word_syllables = self.syllables(next_word)
+
+            if (word_syllables + syllable_count) > 5:
+                next_word = self.get_next_word(current_pair)
+            
+            self.line_3 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+            syllable_count += word_syllables
+
+        self.last_words = current_pair
+
+    def write_shimonoku(self):
+        """
+        Writes the last 2 parts of a tanka in 7-7 syllable pattern.
+        Args:
+            None
+        Return:
+            None
+        """
+        current_pair = self.last_words
+        syllable_count = 0
+
+        while syllable_count < 7:
+            next_word = self.get_next_word(current_pair)
+            word_syllables = self.syllables(next_word)
+
+            if (word_syllables + syllable_count) > 7:
+                next_word = self.get_next_word(current_pair)
+            
+            self.line_4 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+            syllable_count += word_syllables
+            
+        syllable_count = 0
+
+        while syllable_count < 7:
+            next_word = self.get_next_word(current_pair)
+            word_syllables = self.syllables(next_word)
+
+            if (word_syllables + syllable_count) > 7:
+                next_word = self.get_next_word(current_pair)
+                word_syllables = self.syllables(next_word)
+            
+            self.line_5 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+            syllable_count += word_syllables
+
+    def write_tanka(self):
+        """
+        Writes a complete tanka, consisting of the kami-no-ku and shimo-no-ku.
+        Args:
+            None
+        Return:
+            poem (str): the 5-line tanka
+        """
+        start_index = random.randint(0, len(self.ngrams)-1)
+        start_pair = tuple(list(self.ngrams)[start_index])
+
+        self.write_kaminoku(start_pair)
+        self.write_shimonoku()
+
+        poem = self.line_1 + self.line_2 + self.line_3 + self.line_4 + self.line_5
+        return poem
+
+    def perform_poem(self, poem):
+        """
+        Performs a tanka out loud.
+        Args:
+            poem (str): the tanka to be performed
+        Return:
+            None
+        """
+        os.system("say " + poem)
+
+def main():
+    t = Tanka()
+    t.read_files("input/*")
+    t.get_next_word(("like", "a"))
+    p = t.write_tanka()
+    print(p)
+    t.perform_poem(p)
+
+if __name__ == "__main__":
+    main()
