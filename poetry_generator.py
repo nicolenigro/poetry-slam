@@ -9,9 +9,13 @@ Dependencies: glob, os, random, syllapy
 TODO: 
 * incorporate things from 3 scholarly articles (and write about in README)
 * incorporate 4Ps (process, person) and creativity theory
-* export poem
 * display poem on the screen
 * incorporate methods for evaluating the poetry
+* have the first 2 line adress the experience of the poet (what they saw, heard, felt, etc.)
+* have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
+* have final 2 lines express a profound transcendental meaning that prompts reflection
+* lines should not begin with articles
+* name poems?
 
 FIXES:
 * punctuation cleaning of poems in inspiring set
@@ -19,14 +23,7 @@ FIXES:
 * voice of poem performer
 
 TANKA INFO
-Third line is a turn/pivotal image, which marks the transition from the examination of an image
-to the examination of the personal response.
-
-TANKA RECIPE
-Start with two lines addressing the experience of the poet, what they saw, heard, felt, tasted, smelled etc.
-Add a third line (called the turn or pivot) which changes the tone of the poem. It should relate separately to the two lines above and below.
-Finish with two lines which express a profound transcendental meaning that prompts reflection.
-
+Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
 In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
 a tanka to a woman the day after a date, and she would reply in kind. These were short messages (like secret letters) expressing love,
 desire, meaning, or gratitude. These poems often culminated in a transcendental message. Because tanka poems are meant to be given to
@@ -36,6 +33,11 @@ articles (e.g., “a” or “the”) because articles reduce poetic compression
 the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood. Traditionally, tanka has
 addressed a limited number of themes, from seasons to love to travel to death, but contemporary tanka has tackled a much wider range of topics
 within the age-old form.
+
+TANKA RECIPE
+Start with two lines addressing the experience of the poet, what they saw, heard, felt, tasted, smelled etc.
+Add a third line (called the turn or pivot) which changes the tone of the poem. It should relate separately to the two lines above and below.
+Finish with two lines which express a profound transcendental meaning that prompts reflection.
 """
 
 import glob, os, random, syllapy
@@ -59,15 +61,15 @@ class Tanka():
         self.ngrams = dict()
         self.all_words = []
     
-    def read_files(self, directory):
+    def read_files(self, input_dir):
         """
         Read in the files from the inspiring set.
         Arg:
-            directory (str): name of directory the inspiring set of poems are in
+            input_dir (str): name of directory the inspiring set of poems are in
         Return:
             None
         """
-        for filename in glob.glob(directory):
+        for filename in glob.glob(input_dir):
             with open(os.path.join(filename), encoding='utf-8') as f:
                 poem_words = []
                 for word in f.read().split():
@@ -228,6 +230,22 @@ class Tanka():
         poem = self.line_1 + self.line_2 + self.line_3 + self.line_4 + self.line_5
         return poem
 
+    def export_poem(self):
+        """
+        Exports the poem to an output folder.
+        Args:
+            None
+        Return:
+            None
+        """
+        output_path = os.path.join("output", "poem1.txt")
+        with open(output_path, "w", encoding='utf-8') as f:
+            f.write(self.line_1 + "\n")
+            f.write(self.line_2 + "\n")
+            f.write(self.line_3 + "\n")
+            f.write(self.line_4 + "\n")
+            f.write(self.line_5)
+
     def perform_poem(self, poem):
         """
         Performs a tanka out loud.
@@ -241,10 +259,11 @@ class Tanka():
 def main():
     t = Tanka()
     t.read_files("input/*")
-    t.get_next_word(("like", "a"))
+    #t.get_next_word(("like", "a"))
     p = t.write_tanka()
     print(p)
-    t.perform_poem(p)
+    #t.perform_poem(p)
+    t.export_poem()
 
 if __name__ == "__main__":
     main()
