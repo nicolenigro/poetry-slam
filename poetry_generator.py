@@ -7,7 +7,6 @@ Nicole Nigro
 Dependencies: glob, os, random, syllapy
 
 TODO: 
-* add more to inspiring set
 * incorporate things from 3 scholarly articles (and write about in README)
 * incorporate 4Ps (process, person) and creativity theory
 * export poem

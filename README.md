@@ -6,7 +6,7 @@
 
 ## Challenges
 
-## Inspiration
+## Scholarly Papers That Inspired My Approach
 * [About Tanka](https://www.tandfonline.com/doi/full/10.1080/19342039.2016.1120610)
 	* From this article, I learned more about the form of a tanka. It follows a 5-7-5-7-7 syllable pattern, with the first three parts (5-7-5) called the kami-no-ku and the final two parts (7-7) called the shimo-no-ku, which tend to make a pair. To honor the process of tanka poets, I wrote write_kaminoku() and write_shimonoku() functions.
 * [Artificial intelligence versus Maya Angelou: Experimental evidence that people cannot differentiate AI-generated from human-written poetry](https://www.sciencedirect.com/science/article/pii/S0747563220303034)
@@ -22,4 +22,5 @@
 
 ## Sources
 * https://poets.org/glossary/tanka
+* https://pypi.org/project/syllapy/
 * https://tankajournal.com/what-is-tanka/
