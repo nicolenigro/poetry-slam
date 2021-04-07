@@ -4,7 +4,7 @@ CSCI 3725
 Nicole Nigro
 4/5/21
 
-Dependencies: glob, os, random, syllapy
+Dependencies: glob, os, random, string, syllapy, nltk, text2emotion
 
 TODO: 
 * incorporate things from 3 scholarly articles (and write about in README)
@@ -16,11 +16,11 @@ TODO:
 * have final 2 lines express a profound transcendental meaning that prompts reflection
 * lines should not begin with articles
 * name poems?
+* conceptual and syntactical knowledge base
+* implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
 
 FIXES:
-* punctuation cleaning of poems in inspiring set
-* fix if statements in write_line_x functions so that syllable counts match 5/7/5/7/7 syllable pattern
-* voice of poem performer
+* fix if statements functions so that syllable counts match 5/7/5/7/7 syllable pattern
 
 TANKA INFO
 Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
@@ -40,7 +40,12 @@ Add a third line (called the turn or pivot) which changes the tone of the poem. 
 Finish with two lines which express a profound transcendental meaning that prompts reflection.
 """
 
-import glob, os, random, syllapy
+import glob, os, random, string, syllapy
+
+from nltk.tag import pos_tag
+from nltk.tokenize import word_tokenize
+
+import text2emotion as te
 
 class Tanka():
     def __init__(self):
@@ -60,7 +65,8 @@ class Tanka():
         self.last_words = ()
         self.ngrams = dict()
         self.all_words = []
-    
+        self.pos_tags = []
+        
     def read_files(self, input_dir):
         """
         Read in the files from the inspiring set.
@@ -73,8 +79,10 @@ class Tanka():
             with open(os.path.join(filename), encoding='utf-8') as f:
                 poem_words = []
                 for word in f.read().split():
-                    cleaned_word = word.lower().replace("&", "and").replace("--", "").replace(",", "").replace(
-                        ".", "").replace("!", "").replace("?", "").replace(";", "").replace(":", "")
+                    prep_word = word.lower().replace("&", "and").replace("--", "")
+                    exclude = string.punctuation.replace("'", "").replace("-", "")
+                    table = str.maketrans('', '', exclude) #removes punctuation (except ' and -)
+                    cleaned_word = prep_word.translate(table)
                     self.all_words.append(cleaned_word)
                     poem_words.append(cleaned_word)
                 self.create_ngrams(poem_words)
@@ -98,6 +106,17 @@ class Tanka():
                 self.ngrams[ngram] = dict()
                 self.ngrams[ngram][next_word] = 1
         return self.ngrams
+
+    def tag_words(self):
+        """
+        Tags every word with a part of speech
+        Args:
+            None
+        Return:
+            None
+        """
+        for word in self.all_words:
+            self.pos_tags.append(pos_tag(word_tokenize(word)))
 
     def syllables(self, word):
         """
@@ -224,6 +243,10 @@ class Tanka():
         start_index = random.randint(0, len(self.ngrams)-1)
         start_pair = tuple(list(self.ngrams)[start_index])
 
+        if pos_tag(word_tokenize(start_pair[0]))[0][1] == "DT": #first word of a line shouldn't be an article
+            start_index = random.randint(0, len(self.ngrams)-1)
+            start_pair = tuple(list(self.ngrams)[start_index])
+
         self.write_kaminoku(start_pair)
         self.write_shimonoku()
 
@@ -254,16 +277,33 @@ class Tanka():
         Return:
             None
         """
-        os.system("say " + poem)
-
+        voices = ["Samantha", "Victoria", "Alex", "Fred"]
+        speaker = random.choice(voices)
+        os.system("say -v " + speaker + " " + poem)
+    
+    def evaluate_emotion(self, poem):
+        """
+        Evaluates the emotion of a poem (happy, angry, surprise, sad, fear) using the text2emotion package.
+        Args:
+            poem (str): the poem to evaluate
+        Return
+            emotions (dict): a dictionary with the 5 emotions and the poem's score for each
+        """
+        emotions = te.get_emotion(poem)
+        return emotions
+    
 def main():
     t = Tanka()
     t.read_files("input/*")
-    #t.get_next_word(("like", "a"))
+    print(t.get_next_word(("like", "a")))
     p = t.write_tanka()
     print(p)
     #t.perform_poem(p)
-    t.export_poem()
+    #t.export_poem()
+    e = t.tag_words()
+    print(t.evaluate_emotion(p))
+    #print(e)
+    #print(pos_tag(word_tokenize("the a an")))
 
 if __name__ == "__main__":
     main()
