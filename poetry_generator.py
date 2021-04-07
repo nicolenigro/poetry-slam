@@ -2,25 +2,28 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/5/21
+4/7/21
 
 Dependencies: glob, os, random, string, syllapy, nltk, text2emotion
 
 TODO: 
-* incorporate things from 3 scholarly articles (and write about in README)
-* incorporate 4Ps (process, person) and creativity theory
-* display poem on the screen
-* incorporate methods for evaluating the poetry
-* have the first 2 line adress the experience of the poet (what they saw, heard, felt, etc.)
-* have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
-* have final 2 lines express a profound transcendental meaning that prompts reflection
-* lines should not begin with articles
-* name poems?
-* conceptual and syntactical knowledge base
-* implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
-
-FIXES:
 * fix if statements functions so that syllable counts match 5/7/5/7/7 syllable pattern
+* lines should not begin with articles
+* PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
+    * have the first 2 line adress the experience of the poet (what they saw, heard, felt, etc.)
+    * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
+    * have final 2 lines express a profound transcendental meaning that prompts reflection
+    * Conceptual and syntactical knowledge bases
+        * SYNTACTICAL: must obey linguistic conventions, prescribed by a given grammar and lexicon (grammaticality); the choice of
+            words follows a pre-defined text form by following metrical rules (properties of grammaticality and poeticness)
+        * CONCEPTUAL: must convey a conceptual message, meaningful under some interpretation (meaningfulness)
+* EVALUATION
+    * grammar
+    * unity?
+    * message?
+* display poem on the screen
+    * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
+* incorporate more creativity theory from class
 
 TANKA INFO
 Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
@@ -46,6 +49,7 @@ from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 
 import text2emotion as te
+import textstat
 
 class Tanka():
     def __init__(self):
@@ -261,7 +265,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "poem1.txt")
+        output_path = os.path.join("output", "tanka1.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1 + "\n")
             f.write(self.line_2 + "\n")
@@ -281,9 +285,9 @@ class Tanka():
         speaker = random.choice(voices)
         os.system("say -v " + speaker + " " + poem)
     
-    def evaluate_emotion(self, poem):
+    def evaluate_emotions(self, poem):
         """
-        Evaluates the emotion of a poem (happy, angry, surprise, sad, fear) using the text2emotion package.
+        Evaluates the emotions of a poem (happy, angry, surprise, sad, fear) using the text2emotion package.
         Args:
             poem (str): the poem to evaluate
         Return
@@ -291,6 +295,23 @@ class Tanka():
         """
         emotions = te.get_emotion(poem)
         return emotions
+    
+    def evaluate_grammar(self, poem):
+        """
+        """
+        pass
+
+    def evaluate_understandability(self, poem):
+        """
+        Evalautes the understandability using the textstat package. The flesch_reading_ease() method
+        is used to measure the readability of a poem.
+        Args:
+            poem (str): the poem to evaluate
+        Return
+            understandability (float): the flesch reading ease score
+        """
+        understandability = textstat.flesch_reading_ease(poem)
+        return understandability
     
 def main():
     t = Tanka()
@@ -301,7 +322,8 @@ def main():
     #t.perform_poem(p)
     #t.export_poem()
     e = t.tag_words()
-    print(t.evaluate_emotion(p))
+    print(t.evaluate_emotions(p))
+    print(t.evaluate_understandability(p))
     #print(e)
     #print(pos_tag(word_tokenize("the a an")))
 
