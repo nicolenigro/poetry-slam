@@ -2,21 +2,22 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/7/21
+4/8/21
 
-Dependencies: glob, os, random, string, syllapy, nltk, text2emotion
+Dependencies: glob, os, random, string, syllapy, nltk, text2emotion, textstat
 
 TODO: 
 * fix if statements functions so that syllable counts match 5/7/5/7/7 syllable pattern
-* lines should not begin with articles
+* lines should not begin with articles <- implement for last 4 lines
 * PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the first 2 line adress the experience of the poet (what they saw, heard, felt, etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
     * Conceptual and syntactical knowledge bases
-        * SYNTACTICAL: must obey linguistic conventions, prescribed by a given grammar and lexicon (grammaticality); the choice of
-            words follows a pre-defined text form by following metrical rules (properties of grammaticality and poeticness)
-        * CONCEPTUAL: must convey a conceptual message, meaningful under some interpretation (meaningfulness)
+        * SYNTACTICAL:
+            * must obey linguistic conventions, prescribed by a given grammar and lexicon (grammaticality)
+        * CONCEPTUAL:
+            * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * EVALUATION
     * grammar
     * unity?
@@ -43,11 +44,9 @@ Add a third line (called the turn or pivot) which changes the tone of the poem. 
 Finish with two lines which express a profound transcendental meaning that prompts reflection.
 """
 
-import glob, os, random, string, syllapy
-
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-
+import glob, os, random, string, syllapy
 import text2emotion as te
 import textstat
 
@@ -87,7 +86,8 @@ class Tanka():
                     exclude = string.punctuation.replace("'", "").replace("-", "")
                     table = str.maketrans('', '', exclude) #removes punctuation (except ' and -)
                     cleaned_word = prep_word.translate(table)
-                    self.all_words.append(cleaned_word)
+                    if word not in self.all_words:
+                        self.all_words.append(cleaned_word)
                     poem_words.append(cleaned_word)
                 self.create_ngrams(poem_words)
 
@@ -165,22 +165,18 @@ class Tanka():
             next_word = self.get_next_word(current_pair)
             word_syllables = self.syllables(next_word)
 
-            if (word_syllables + syllable_count) > 5:
-                next_word = self.get_next_word(current_pair)
-            
+            #if (word_syllables + syllable_count) <= 5:
             self.line_1 += next_word + " "
             current_pair = (current_pair[1], next_word)
             syllable_count += word_syllables
-
+        
         syllable_count = 0
 
         while syllable_count < 7:
             next_word = self.get_next_word(current_pair)
             word_syllables = self.syllables(next_word)
 
-            if (word_syllables + syllable_count) > 7:
-                next_word = self.get_next_word(current_pair)
-            
+            #if (word_syllables + syllable_count) <= 7:
             self.line_2 += next_word + " "
             current_pair = (current_pair[1], next_word)
             syllable_count += word_syllables
@@ -191,13 +187,11 @@ class Tanka():
             next_word = self.get_next_word(current_pair)
             word_syllables = self.syllables(next_word)
 
-            if (word_syllables + syllable_count) > 5:
-                next_word = self.get_next_word(current_pair)
-            
+            #if (word_syllables + syllable_count) <= 5:
             self.line_3 += next_word + " "
             current_pair = (current_pair[1], next_word)
             syllable_count += word_syllables
-
+        
         self.last_words = current_pair
 
     def write_shimonoku(self):
@@ -265,7 +259,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "tanka1.txt")
+        output_path = os.path.join("output", "tanka2.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1 + "\n")
             f.write(self.line_2 + "\n")
@@ -299,7 +293,41 @@ class Tanka():
     def evaluate_grammar(self, poem):
         """
         """
-        pass
+        # CC	coordinating conjunction
+        # CD	cardinal digit
+        # DT	determiner
+        # EX	existential there
+        # FW	foreign word
+        # IN	preposition/subordinating conjunction
+        # JJ	This NLTK POS Tag is an adjective (large)
+        # JJR	adjective, comparative (larger)
+        # JJS	adjective, superlative (largest)
+        # LS	list market
+        # MD	modal (could, will)
+        # NN	noun, singular (cat, tree)
+        # NNS	noun plural (desks)
+        # NNP	proper noun, singular (sarah)
+        # NNPS	proper noun, plural (indians or americans)
+        # PDT	predeterminer (all, both, half)
+        # POS	possessive ending (parent\ 's)
+        # PRP	personal pronoun (hers, herself, him,himself)
+        # PRP$	possessive pronoun (her, his, mine, my, our )
+        # RB	adverb (occasionally, swiftly)
+        # RBR	adverb, comparative (greater)
+        # RBS	adverb, superlative (biggest)
+        # RP	particle (about)
+        # TO	infinite marker (to)
+        # UH	interjection (goodbye)
+        # VB	verb (ask)
+        # VBG	verb gerund (judging)
+        # VBD	verb past tense (pleaded)
+        # VBN	verb past participle (reunified)
+        # VBP	verb, present tense not 3rd person singular(wrap)
+        # VBZ	verb, present tense with 3rd person singular (bases)
+        # WDT	wh-determiner (that, what)
+        # WP	wh- pronoun (who)
+        # WRB	wh- adverb (how)
+        return None
 
     def evaluate_understandability(self, poem):
         """
@@ -312,6 +340,7 @@ class Tanka():
         """
         understandability = textstat.flesch_reading_ease(poem)
         return understandability
+
     
 def main():
     t = Tanka()
@@ -320,12 +349,19 @@ def main():
     p = t.write_tanka()
     print(p)
     #t.perform_poem(p)
-    #t.export_poem()
+    print(t.syllables(t.line_1))
+    print(t.syllables(t.line_2))
+    print(t.syllables(t.line_3))
+    print(t.syllables(t.line_4))
+    print(t.syllables(t.line_5))
     e = t.tag_words()
-    print(t.evaluate_emotions(p))
-    print(t.evaluate_understandability(p))
+    t.export_poem()
+    #print(t.evaluate_emotions(p))
+    #print(t.evaluate_understandability(p))
+    print(t.evaluate_grammar(p))
     #print(e)
     #print(pos_tag(word_tokenize("the a an")))
+    #print(pos_tag(word_tokenize(p)))
 
 if __name__ == "__main__":
     main()

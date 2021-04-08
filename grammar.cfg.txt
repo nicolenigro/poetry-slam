@@ -1,0 +1,65 @@
+S -> NP VP
+NP -> DT Nom | NNP | NNPS
+Nom -> Adj Nom | NN | NNS
+VP -> V Adj | V NP | V S | V NP PP
+Adj -> JJ | JJR | JJS
+V -> VB | VBG | VBD | VBN	 | VBP | VBZ
+PP -> IN NP
+
+CC -> 
+CD -> 
+DT -> 
+EX ->
+FW ->
+IN ->
+JJ ->
+JJR ->
+JJS ->
+LS ->
+MD ->
+NN ->
+NNS -> 'captains' | 'vectors' | 'alights' | 'remarks' | 'edits'
+NNP ->
+NNPS ->
+PDT ->
+POS ->
+PRP ->
+PRP$ ->
+RB ->
+RBR ->
+RBS ->
+RP ->
+TO ->
+UH ->
+VB ->
+VBG ->
+VBD ->
+VBN ->
+VBP ->
+VBZ ->
+WDT ->
+WP -> 
+WRB ->
+
+
+Not in gramma rules yet
+        # CC	coordinating conjunction
+        # CD	cardinal digit
+        # DT	determiner
+        # EX	existential there
+        # FW	foreign word
+        # LS	list market
+        # MD	modal (could, will)
+        # PDT	predeterminer (all, both, half)
+        # POS	possessive ending (parent\ 's)
+        # PRP	personal pronoun (hers, herself, him,himself)
+        # PRP$	possessive pronoun (her, his, mine, my, our )
+        # RB	adverb (occasionally, swiftly)
+        # RBR	adverb, comparative (greater)
+        # RBS	adverb, superlative (biggest)
+        # RP	particle (about)
+        # TO	infinite marker (to)
+        # UH	interjection (goodbye)
+        # WDT	wh-determiner (that, what)
+        # WP	wh- pronoun (who)
+        # WRB	wh- adverb (how)
