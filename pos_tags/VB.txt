@@ -1,0 +1,1 @@
+'see' | 'leave' | 'get' | 'be' | 'do' | 'let' | 'say' | 'have' | 'slow' | 'let' | 'take' | 'keep' | 'criticize' | '“' | 'come' | 'know' | 'allow' | 'remember' | 'make' | 'go' | 'find' | 'run' | 'sharpen' | 'rotten' | 'give' | 'appear' | 'believe' | 'be' | 'repose' | 'follow' | 'buy' | 'sterilize' | 'rave' | 'rove' | 'expect' | 'identify' | 

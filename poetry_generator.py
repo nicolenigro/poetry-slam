@@ -4,13 +4,16 @@ CSCI 3725
 Nicole Nigro
 4/8/21
 
+Generates and evaluates poems in the tanka form.
+
 Dependencies: glob, os, random, string, syllapy, nltk, text2emotion, textstat
 
 TODO: 
 * fix if statements functions so that syllable counts match 5/7/5/7/7 syllable pattern
-* lines should not begin with articles <- implement for last 4 lines
+    * problem: sometimes the only option available would exceed the syllable limit
+* lines should not begin with articles <- implement for last 4 lines?
 * PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
-    * have the first 2 line adress the experience of the poet (what they saw, heard, felt, etc.)
+    * have the first 2 line address the experience of the poet (what they saw, heard, felt, tasted, smelled etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
     * Conceptual and syntactical knowledge bases
@@ -19,9 +22,12 @@ TODO:
         * CONCEPTUAL:
             * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * EVALUATION
-    * grammar
-    * unity?
-    * message?
+    * fix evaluated_grammar()
+        * word cases: 'you’re', cop's, "won\'t", "couldn’t"
+        * incorporate my final grammar rules (CC)-why do they cause errors?
+    * weight everything for an overall score?
+    * generate x and then only take top y?
+    * metrics folder
 * display poem on the screen
     * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
 * incorporate more creativity theory from class
@@ -37,15 +43,11 @@ articles (e.g., “a” or “the”) because articles reduce poetic compression
 the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood. Traditionally, tanka has
 addressed a limited number of themes, from seasons to love to travel to death, but contemporary tanka has tackled a much wider range of topics
 within the age-old form.
-
-TANKA RECIPE
-Start with two lines addressing the experience of the poet, what they saw, heard, felt, tasted, smelled etc.
-Add a third line (called the turn or pivot) which changes the tone of the poem. It should relate separately to the two lines above and below.
-Finish with two lines which express a profound transcendental meaning that prompts reflection.
 """
 
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
+import nltk
 import glob, os, random, string, syllapy
 import text2emotion as te
 import textstat
@@ -69,6 +71,7 @@ class Tanka():
         self.ngrams = dict()
         self.all_words = []
         self.pos_tags = []
+        self.grammar_score = 0
         
     def read_files(self, input_dir):
         """
@@ -86,7 +89,7 @@ class Tanka():
                     exclude = string.punctuation.replace("'", "").replace("-", "")
                     table = str.maketrans('', '', exclude) #removes punctuation (except ' and -)
                     cleaned_word = prep_word.translate(table)
-                    if word not in self.all_words:
+                    if cleaned_word not in self.all_words:
                         self.all_words.append(cleaned_word)
                     poem_words.append(cleaned_word)
                 self.create_ngrams(poem_words)
@@ -121,10 +124,10 @@ class Tanka():
         """
         for word in self.all_words:
             self.pos_tags.append(pos_tag(word_tokenize(word)))
-
+            
     def syllables(self, word):
         """
-        Counts the number of syllables in a word.
+        Counts the number of syllables in a word using the syllapy package.
         Arg:
             word (str): the word
         Return:
@@ -253,7 +256,7 @@ class Tanka():
 
     def export_poem(self):
         """
-        Exports the poem to an output folder.
+        Exports a poem to an output folder.
         Args:
             None
         Return:
@@ -266,6 +269,25 @@ class Tanka():
             f.write(self.line_3 + "\n")
             f.write(self.line_4 + "\n")
             f.write(self.line_5)
+        
+    def export_pos_tags(self):
+        """
+        Export a file with all the words that are of a specified part of speech.
+        Args:
+            None
+        Return:
+            None
+        """
+        output_path = os.path.join("pos_tags", "VBD.txt")
+        with open(output_path, "w", encoding='utf-8') as f:
+            for word in self.all_words:
+                if len(pos_tag(word_tokenize(word))) == 0:
+                    pass
+                elif pos_tag(word_tokenize(word))[0][1] == "VBD":
+                    print(pos_tag(word_tokenize(word))[0][0])
+                    f.write("'" + str(pos_tag(word_tokenize(word))[0][0] + "'" + " | "))
+                else:
+                    pass
 
     def perform_poem(self, poem):
         """
@@ -292,42 +314,26 @@ class Tanka():
     
     def evaluate_grammar(self, poem):
         """
+        Evaluates the grammar of a poem. Uses code from: https://www.fireblazeaischool.in/blogs/grammar-checking-using-nltk/
+        Args:
+            poem (str): the poem to evaluate
+        Return:
+            None
         """
-        # CC	coordinating conjunction
-        # CD	cardinal digit
-        # DT	determiner
-        # EX	existential there
-        # FW	foreign word
-        # IN	preposition/subordinating conjunction
-        # JJ	This NLTK POS Tag is an adjective (large)
-        # JJR	adjective, comparative (larger)
-        # JJS	adjective, superlative (largest)
-        # LS	list market
-        # MD	modal (could, will)
-        # NN	noun, singular (cat, tree)
-        # NNS	noun plural (desks)
-        # NNP	proper noun, singular (sarah)
-        # NNPS	proper noun, plural (indians or americans)
-        # PDT	predeterminer (all, both, half)
-        # POS	possessive ending (parent\ 's)
-        # PRP	personal pronoun (hers, herself, him,himself)
-        # PRP$	possessive pronoun (her, his, mine, my, our )
-        # RB	adverb (occasionally, swiftly)
-        # RBR	adverb, comparative (greater)
-        # RBS	adverb, superlative (biggest)
-        # RP	particle (about)
-        # TO	infinite marker (to)
-        # UH	interjection (goodbye)
-        # VB	verb (ask)
-        # VBG	verb gerund (judging)
-        # VBD	verb past tense (pleaded)
-        # VBN	verb past participle (reunified)
-        # VBP	verb, present tense not 3rd person singular(wrap)
-        # VBZ	verb, present tense with 3rd person singular (bases)
-        # WDT	wh-determiner (that, what)
-        # WP	wh- pronoun (who)
-        # WRB	wh- adverb (how)
-        return None
+        load_grammar = nltk.data.load('file:grammar.cfg')
+        for word in poem.split():
+            wrong_syntax = 1
+            word_split = word.split()
+            print("\n\n"+ word)
+            rd_parser = nltk.RecursiveDescentParser(load_grammar)
+            for tree_struc in rd_parser.parse(word_split):
+                s = tree_struc
+                wrong_syntax = 0 
+                self.grammar_score += 1
+                print("Correct Grammer !!!")
+                print(str(s))
+            if wrong_syntax == 1:
+                print("Wrong Grammer!!!!")
 
     def evaluate_understandability(self, poem):
         """
@@ -354,14 +360,12 @@ def main():
     print(t.syllables(t.line_3))
     print(t.syllables(t.line_4))
     print(t.syllables(t.line_5))
-    e = t.tag_words()
-    t.export_poem()
+    t.tag_words()
+    #t.export_poem()
     #print(t.evaluate_emotions(p))
     #print(t.evaluate_understandability(p))
     print(t.evaluate_grammar(p))
-    #print(e)
-    #print(pos_tag(word_tokenize("the a an")))
-    #print(pos_tag(word_tokenize(p)))
+    print(t.grammar_score)
 
 if __name__ == "__main__":
     main()
