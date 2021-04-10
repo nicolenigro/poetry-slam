@@ -2,20 +2,21 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/8/21
+4/10/21
 
 Generates and evaluates poems in the tanka form.
 
 Dependencies: glob, os, random, string, syllapy, nltk, text2emotion, textstat
 
 TODO: 
-* fix if statements functions so that syllable counts match 5/7/5/7/7 syllable pattern
-    * problem: sometimes the only option available would exceed the syllable limit
 * lines should not begin with articles <- implement for last 4 lines?
 * PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the first 2 line address the experience of the poet (what they saw, heard, felt, tasted, smelled etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
+        * make a connection that is just enough distinct that the reader is familiar with
+        * try as a human first
+        * Beale
     * Conceptual and syntactical knowledge bases
         * SYNTACTICAL:
             * must obey linguistic conventions, prescribed by a given grammar and lexicon (grammaticality)
@@ -25,6 +26,7 @@ TODO:
     * fix evaluated_grammar()
         * word cases: 'you’re', cop's, "won\'t", "couldn’t"
         * incorporate my final grammar rules (CC)-why do they cause errors?
+        * might have been labelled something else?
     * weight everything for an overall score?
     * generate x and then only take top y?
     * metrics folder
@@ -45,9 +47,10 @@ addressed a limited number of themes, from seasons to love to travel to death, b
 within the age-old form.
 """
 
+import nltk
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-import nltk
+
 import glob, os, random, string, syllapy
 import text2emotion as te
 import textstat
@@ -163,37 +166,36 @@ class Tanka():
         """
         self.line_1 += current_pair[0] + " " + current_pair[1] + " "
         syllable_count = self.syllables(str(current_pair))
-
-        while syllable_count < 5:
-            next_word = self.get_next_word(current_pair)
-            word_syllables = self.syllables(next_word)
-
-            #if (word_syllables + syllable_count) <= 5:
-            self.line_1 += next_word + " "
-            current_pair = (current_pair[1], next_word)
-            syllable_count += word_syllables
         
-        syllable_count = 0
+        while self.syllables(self.line_1) != 5:
+            if self.syllables(self.line_1) < 5:
+                next_word = self.get_next_word(current_pair)
+                self.line_1 += next_word + " "
+                current_pair = (current_pair[1], next_word)
+            else: 
+                self.line_1 = ' '.join(self.line_1.split(' ')[:-1]) + " "
+        
+        print("line 1 done")
+        
+        while self.syllables(self.line_2) != 7:
+            if self.syllables(self.line_2) < 7:
+                next_word = self.get_next_word(current_pair)
+                self.line_2 += next_word + " "
+                current_pair = (current_pair[1], next_word)
+            else: 
+                self.line_2 = ' '.join(self.line_2.split(' ')[:-1]) + " "
 
-        while syllable_count < 7:
-            next_word = self.get_next_word(current_pair)
-            word_syllables = self.syllables(next_word)
+        print("line 2 done")
 
-            #if (word_syllables + syllable_count) <= 7:
-            self.line_2 += next_word + " "
-            current_pair = (current_pair[1], next_word)
-            syllable_count += word_syllables
-
-        syllable_count = 0
-
-        while syllable_count < 5:
-            next_word = self.get_next_word(current_pair)
-            word_syllables = self.syllables(next_word)
-
-            #if (word_syllables + syllable_count) <= 5:
-            self.line_3 += next_word + " "
-            current_pair = (current_pair[1], next_word)
-            syllable_count += word_syllables
+        while self.syllables(self.line_3) != 5:
+            if self.syllables(self.line_3) < 5:
+                next_word = self.get_next_word(current_pair)
+                self.line_3 += next_word + " "
+                current_pair = (current_pair[1], next_word)
+            else: 
+                self.line_3 = ' '.join(self.line_3.split(' ')[:-1]) + " "
+        
+        print("line 3 done")
         
         self.last_words = current_pair
 
@@ -206,33 +208,27 @@ class Tanka():
             None
         """
         current_pair = self.last_words
-        syllable_count = 0
 
-        while syllable_count < 7:
-            next_word = self.get_next_word(current_pair)
-            word_syllables = self.syllables(next_word)
-
-            if (word_syllables + syllable_count) > 7:
+        while self.syllables(self.line_4) != 7:
+            if self.syllables(self.line_4) < 7:
                 next_word = self.get_next_word(current_pair)
-            
-            self.line_4 += next_word + " "
-            current_pair = (current_pair[1], next_word)
-            syllable_count += word_syllables
-            
-        syllable_count = 0
-
-        while syllable_count < 7:
-            next_word = self.get_next_word(current_pair)
-            word_syllables = self.syllables(next_word)
-
-            if (word_syllables + syllable_count) > 7:
+                self.line_4 += next_word + " "
+                current_pair = (current_pair[1], next_word)
+            else: 
+                self.line_4 = ' '.join(self.line_4.split(' ')[:-1]) + " "
+        
+        print("line 4 done")
+        
+        while self.syllables(self.line_5) != 7:
+            if self.syllables(self.line_5) < 7:
                 next_word = self.get_next_word(current_pair)
-                word_syllables = self.syllables(next_word)
-            
-            self.line_5 += next_word + " "
-            current_pair = (current_pair[1], next_word)
-            syllable_count += word_syllables
-
+                self.line_5 += next_word + " "
+                current_pair = (current_pair[1], next_word)
+            else: 
+                self.line_5 = ' '.join(self.line_5.split(' ')[:-1]) + " "
+        
+        print("line 5 done")
+                
     def write_tanka(self):
         """
         Writes a complete tanka, consisting of the kami-no-ku and shimo-no-ku.
@@ -262,7 +258,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "tanka2.txt")
+        output_path = os.path.join("output", "tanka1.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1 + "\n")
             f.write(self.line_2 + "\n")
@@ -330,10 +326,10 @@ class Tanka():
                 s = tree_struc
                 wrong_syntax = 0 
                 self.grammar_score += 1
-                print("Correct Grammer !!!")
+                print("Correct Grammar !!!")
                 print(str(s))
             if wrong_syntax == 1:
-                print("Wrong Grammer!!!!")
+                print("Wrong Grammar!!!!")
 
     def evaluate_understandability(self, poem):
         """
@@ -351,7 +347,7 @@ class Tanka():
 def main():
     t = Tanka()
     t.read_files("input/*")
-    print(t.get_next_word(("like", "a")))
+    #print(t.get_next_word(("like", "a")))
     p = t.write_tanka()
     print(p)
     #t.perform_poem(p)
@@ -360,12 +356,15 @@ def main():
     print(t.syllables(t.line_3))
     print(t.syllables(t.line_4))
     print(t.syllables(t.line_5))
-    t.tag_words()
-    #t.export_poem()
+    t.export_poem()
+    #print(pos_tag(word_tokenize("you’re")))
+    #print(pos_tag(word_tokenize("won\'t")))
+    #print(pos_tag(word_tokenize("cop's")))
+    #print(pos_tag(word_tokenize("couldn’t")))
     #print(t.evaluate_emotions(p))
     #print(t.evaluate_understandability(p))
-    print(t.evaluate_grammar(p))
-    print(t.grammar_score)
+    #print(t.evaluate_grammar(p))
+    #print(t.grammar_score)
 
 if __name__ == "__main__":
     main()
