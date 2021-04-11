@@ -2,14 +2,13 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/10/21
+4/11/21
 
 Generates and evaluates poems in the tanka form.
 
-Dependencies: glob, os, random, string, syllapy, nltk, text2emotion, textstat
+Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textstat, num2words
 
 TODO: 
-* lines should not begin with articles <- implement for last 4 lines?
 * PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the first 2 line address the experience of the poet (what they saw, heard, felt, tasted, smelled etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
@@ -17,19 +16,17 @@ TODO:
         * make a connection that is just enough distinct that the reader is familiar with
         * try as a human first
         * Beale
-    * Conceptual and syntactical knowledge bases
-        * SYNTACTICAL:
-            * must obey linguistic conventions, prescribed by a given grammar and lexicon (grammaticality)
+    * Conceptual knowledge base
         * CONCEPTUAL:
             * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * EVALUATION
     * fix evaluated_grammar()
         * word cases: 'you’re', cop's, "won\'t", "couldn’t"
-        * incorporate my final grammar rules (CC)-why do they cause errors?
-        * might have been labelled something else?
+        * update grammar to reflect nums replaced by words
     * weight everything for an overall score?
     * generate x and then only take top y?
-    * metrics folder
+* ERRORS
+    * how to handle problems with writing (i.e. word not in vowels, not in syllapy dictionary)
 * display poem on the screen
     * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
 * incorporate more creativity theory from class
@@ -50,10 +47,10 @@ within the age-old form.
 import nltk
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-
-import glob, os, random, string, syllapy
+import glob, os, random, re, string, syllapy
 import text2emotion as te
 import textstat
+import num2words
 
 class Tanka():
     def __init__(self):
@@ -71,10 +68,13 @@ class Tanka():
         self.line_4 = ""
         self.line_5 = ""
         self.last_words = ()
-        self.ngrams = dict()
+        self.unigrams = dict()
+        self.bigrams = dict()
         self.all_words = []
         self.pos_tags = []
+        self.emotions = dict()
         self.grammar_score = 0
+        self.understandability_score = 0
         
     def read_files(self, input_dir):
         """
@@ -92,41 +92,31 @@ class Tanka():
                     exclude = string.punctuation.replace("'", "").replace("-", "")
                     table = str.maketrans('', '', exclude) #removes punctuation (except ' and -)
                     cleaned_word = prep_word.translate(table)
-                    if cleaned_word not in self.all_words:
-                        self.all_words.append(cleaned_word)
-                    poem_words.append(cleaned_word)
-                self.create_ngrams(poem_words)
+                    num_free_word = re.sub(r"(\d+)", lambda x: num2words.num2words(int(x.group(0))), cleaned_word) #replaces numbers with their words
+                    if num_free_word not in self.all_words:
+                        self.all_words.append(num_free_word)
+                    poem_words.append(num_free_word)
+                self.create_bigrams(poem_words)
 
-    def create_ngrams(self, words):
+    def create_bigrams(self, words):
         """
         Creates 2-word ngrams.
         Arg:
             words (list): list of words in a poem
         Return:
-            ngrams (dict): 2-word ngrams and the words that follow after and their frequencies
+            bigrams (dict): 2-word ngrams and the words that follow after and their frequencies
         """
         for i in range(len(words)-2):
             ngram = (words[i], words[i+1])
             next_word = words[i+2]
-            if ngram in self.ngrams and next_word in self.ngrams[ngram]:
-                self.ngrams[ngram][next_word] += 1
-            elif ngram in self.ngrams:
-                self.ngrams[ngram][next_word] = 1
+            if ngram in self.bigrams and next_word in self.bigrams[ngram]:
+                self.bigrams[ngram][next_word] += 1
+            elif ngram in self.bigrams:
+                self.bigrams[ngram][next_word] = 1
             else:
-                self.ngrams[ngram] = dict()
-                self.ngrams[ngram][next_word] = 1
-        return self.ngrams
-
-    def tag_words(self):
-        """
-        Tags every word with a part of speech
-        Args:
-            None
-        Return:
-            None
-        """
-        for word in self.all_words:
-            self.pos_tags.append(pos_tag(word_tokenize(word)))
+                self.bigrams[ngram] = dict()
+                self.bigrams[ngram][next_word] = 1
+        return self.bigrams
             
     def syllables(self, word):
         """
@@ -147,15 +137,15 @@ class Tanka():
         Return:
             next_word (str): the word chosen to follow next in the poem
         """
-        if word_pair in self.ngrams:
-            word_options = list(self.ngrams[word_pair].keys())
-            word_frequencies = [self.ngrams[word_pair][i] for i in word_options]
+        if word_pair in self.bigrams:
+            word_options = list(self.bigrams[word_pair].keys())
+            word_frequencies = [self.bigrams[word_pair][i] for i in word_options]
             next_word = random.choices(population=word_options, weights=word_frequencies, k=1)[0]
         else:
             word_index = random.randint(0, len(self.all_words)-1)
             next_word = self.all_words[word_index]
         return next_word
-
+    
     def write_kaminoku(self, current_pair):
         """
         Writes the first 3 parts of a tanka in 5-7-5 syllable pattern.
@@ -166,7 +156,7 @@ class Tanka():
         """
         self.line_1 += current_pair[0] + " " + current_pair[1] + " "
         syllable_count = self.syllables(str(current_pair))
-        
+
         while self.syllables(self.line_1) != 5:
             if self.syllables(self.line_1) < 5:
                 next_word = self.get_next_word(current_pair)
@@ -175,7 +165,7 @@ class Tanka():
             else: 
                 self.line_1 = ' '.join(self.line_1.split(' ')[:-1]) + " "
         
-        print("line 1 done")
+        print("line 1 done: " + self.line_1)
         
         while self.syllables(self.line_2) != 7:
             if self.syllables(self.line_2) < 7:
@@ -183,9 +173,9 @@ class Tanka():
                 self.line_2 += next_word + " "
                 current_pair = (current_pair[1], next_word)
             else: 
-                self.line_2 = ' '.join(self.line_2.split(' ')[:-1]) + " "
-
-        print("line 2 done")
+                self.line_2 = ' '.join(self.line_2.split(' ')[:-1]) + " " 
+        
+        print("line 2 done: " + self.line_2)
 
         while self.syllables(self.line_3) != 5:
             if self.syllables(self.line_3) < 5:
@@ -195,7 +185,7 @@ class Tanka():
             else: 
                 self.line_3 = ' '.join(self.line_3.split(' ')[:-1]) + " "
         
-        print("line 3 done")
+        print("line 3 done: " + self.line_3)
         
         self.last_words = current_pair
 
@@ -217,10 +207,10 @@ class Tanka():
             else: 
                 self.line_4 = ' '.join(self.line_4.split(' ')[:-1]) + " "
         
-        print("line 4 done")
+        print("line 4 done: " + self.line_4)
         
         while self.syllables(self.line_5) != 7:
-            if self.syllables(self.line_5) < 7:
+            if self.syllables(self.line_5) <= 7:
                 next_word = self.get_next_word(current_pair)
                 self.line_5 += next_word + " "
                 current_pair = (current_pair[1], next_word)
@@ -237,17 +227,20 @@ class Tanka():
         Return:
             poem (str): the 5-line tanka
         """
-        start_index = random.randint(0, len(self.ngrams)-1)
-        start_pair = tuple(list(self.ngrams)[start_index])
+        ready = False
 
-        if pos_tag(word_tokenize(start_pair[0]))[0][1] == "DT": #first word of a line shouldn't be an article
-            start_index = random.randint(0, len(self.ngrams)-1)
-            start_pair = tuple(list(self.ngrams)[start_index])
+        while not ready:
+            start_index = random.randint(0, len(self.bigrams)-1)
+            start_pair = tuple(list(self.bigrams)[start_index])
 
-        self.write_kaminoku(start_pair)
-        self.write_shimonoku()
+            #first word of a tanka shouldn't be an article
+            if pos_tag(word_tokenize(start_pair[0]))[0][1] != "DT" and self.syllables(str(start_pair)) <= 5:
+                self.write_kaminoku(start_pair)
+                self.write_shimonoku()
+                ready = True
 
         poem = self.line_1 + self.line_2 + self.line_3 + self.line_4 + self.line_5
+
         return poem
 
     def export_poem(self):
@@ -258,7 +251,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "tanka1.txt")
+        output_path = os.path.join("output", "tanka4.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1 + "\n")
             f.write(self.line_2 + "\n")
@@ -305,8 +298,8 @@ class Tanka():
         Return
             emotions (dict): a dictionary with the 5 emotions and the poem's score for each
         """
-        emotions = te.get_emotion(poem)
-        return emotions
+        self.emotions = te.get_emotion(poem)
+        return self.emotions
     
     def evaluate_grammar(self, poem):
         """
@@ -340,16 +333,42 @@ class Tanka():
         Return
             understandability (float): the flesch reading ease score
         """
-        understandability = textstat.flesch_reading_ease(poem)
-        return understandability
+        self.understandability_score = textstat.flesch_reading_ease(poem)
+        return self.understandability_score
+    
+    def evaluate_overall_score(self):
+        """
+        Uses the 3 evaluation methods to give the poem an overall score
+        Args:
+            None
+        Return:
+            None
+        """
+        pass
 
+    def export_metrics(self):
+        """
+        Exports the metrics from evaluation of the tanka: emotions, grammar, understandability.
+        Args:
+            None
+        Return:
+            None
+        """
+        output_path = os.path.join("metrics", "tanka4-metrics.txt")
+        with open(output_path, "w", encoding='utf-8') as f:
+            f.write("Emotions: " + str(self.emotions) + "\n")
+            f.write("Grammar: " + str(self.grammar_score) + "\n")
+            f.write("Understandability: " + str(self.understandability_score) + "\n")
     
 def main():
     t = Tanka()
     t.read_files("input/*")
-    #print(t.get_next_word(("like", "a")))
     p = t.write_tanka()
-    print(p)
+    print(t.line_1)
+    print(t.line_2)
+    print(t.line_3)
+    print(t.line_4)
+    print(t.line_5)
     #t.perform_poem(p)
     print(t.syllables(t.line_1))
     print(t.syllables(t.line_2))
@@ -357,14 +376,10 @@ def main():
     print(t.syllables(t.line_4))
     print(t.syllables(t.line_5))
     t.export_poem()
-    #print(pos_tag(word_tokenize("you’re")))
-    #print(pos_tag(word_tokenize("won\'t")))
-    #print(pos_tag(word_tokenize("cop's")))
-    #print(pos_tag(word_tokenize("couldn’t")))
-    #print(t.evaluate_emotions(p))
-    #print(t.evaluate_understandability(p))
-    #print(t.evaluate_grammar(p))
-    #print(t.grammar_score)
+    t.evaluate_emotions(p)
+    t.evaluate_understandability(p)
+    t.evaluate_grammar(p)
+    t.export_metrics()
 
 if __name__ == "__main__":
     main()
