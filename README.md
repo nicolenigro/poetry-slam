@@ -29,6 +29,7 @@ $ pip3 install nltk
 $ pip3 install syllapy
 $ pip3 install text2emotion
 $ pip3 install textstat
+$ pip3 install num2words
 ```
 6. Type and enter the following line into the terminal to run the program.  
 ```

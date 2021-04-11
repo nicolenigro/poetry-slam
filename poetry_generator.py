@@ -22,7 +22,6 @@ TODO:
 * EVALUATION
     * fix evaluated_grammar()
         * word cases: 'you’re', cop's, "won\'t", "couldn’t"
-        * update grammar to reflect nums replaced by words
     * weight everything for an overall score?
     * generate x and then only take top y?
 * ERRORS
@@ -68,7 +67,6 @@ class Tanka():
         self.line_4 = ""
         self.line_5 = ""
         self.last_words = ()
-        self.unigrams = dict()
         self.bigrams = dict()
         self.all_words = []
         self.pos_tags = []
@@ -267,13 +265,12 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("pos_tags", "VBD.txt")
+        output_path = os.path.join("pos_tags", "NN.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             for word in self.all_words:
                 if len(pos_tag(word_tokenize(word))) == 0:
                     pass
-                elif pos_tag(word_tokenize(word))[0][1] == "VBD":
-                    print(pos_tag(word_tokenize(word))[0][0])
+                elif pos_tag(word_tokenize(word))[0][1] == "NN":
                     f.write("'" + str(pos_tag(word_tokenize(word))[0][0] + "'" + " | "))
                 else:
                     pass
@@ -363,7 +360,8 @@ class Tanka():
 def main():
     t = Tanka()
     t.read_files("input/*")
-    p = t.write_tanka()
+    t.export_pos_tags()
+    #p = t.write_tanka()
     print(t.line_1)
     print(t.line_2)
     print(t.line_3)
@@ -375,11 +373,11 @@ def main():
     print(t.syllables(t.line_3))
     print(t.syllables(t.line_4))
     print(t.syllables(t.line_5))
-    t.export_poem()
+    """t.export_poem()
     t.evaluate_emotions(p)
     t.evaluate_understandability(p)
     t.evaluate_grammar(p)
-    t.export_metrics()
+    t.export_metrics()"""
 
 if __name__ == "__main__":
     main()
