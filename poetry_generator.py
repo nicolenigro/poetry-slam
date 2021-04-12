@@ -8,11 +8,12 @@ Generates and evaluates poems in the tanka form.
 
 Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textstat, num2words
 
-TODO: 
+TODO - code: 
 * ERRORS
     * how to handle problems with writing (i.e. word not in vowels, not in syllapy dictionary)
-    * use unigrams instead?
-* PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
+    * change the while loops??
+    * word cases in evaluate_grammar: 'you’re', cop's, "won\'t", "couldn’t"
+* 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the first 2 line address the experience of the poet (what they saw, heard, felt, tasted, smelled etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
@@ -20,16 +21,23 @@ TODO:
         * try as a human first
         * Beale
     * Conceptual knowledge base
-        * CONCEPTUAL:
-            * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
+        * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * EVALUATION
-    * fix evaluated_grammar()
-        * word cases: 'you’re', cop's, "won\'t", "couldn’t"
-    * weight everything for an overall score?
-    * generate x and then only take top y?
+    * make meaning out of grammar score
 * display poem on the screen
     * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
-* incorporate more creativity theory from class
+* incorporate more creativity theory from class into algorithms and documentation
+
+TODO - not code:
+* README
+    * Title: Tanka Artful Generator for Knowledgable Artifacts (TAGKA);  System for Novel Tanka Generating Tanka Artifacts (TANGTA)
+    * Description
+    * Challenges
+    * Scholarly paper and their inspo 
+* VIDEO
+    * video file of your system generating, evaluating, and performing a new poetry piece live.
+    * Bonus points will be awarded if you have an audience reacting to what your system generates live.
+        * If you do this, it should be clear what the system says, and what the follow-up reaction by the audience is.
 
 TANKA INFO
 Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
@@ -358,16 +366,6 @@ class Tanka():
             self.understandability_category = "Very Confusing" # <= 29
 
         return self.understandability_score
-    
-    def evaluate_overall_score(self):
-        """
-        Uses the 3 evaluation methods to give the poem an overall score
-        Args:
-            None
-        Return:
-            None
-        """
-        pass
 
     def export_metrics(self):
         """
