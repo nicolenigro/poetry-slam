@@ -9,6 +9,9 @@ Generates and evaluates poems in the tanka form.
 Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textstat, num2words
 
 TODO: 
+* ERRORS
+    * how to handle problems with writing (i.e. word not in vowels, not in syllapy dictionary)
+    * use unigrams instead?
 * PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the first 2 line address the experience of the poet (what they saw, heard, felt, tasted, smelled etc.)
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
@@ -24,8 +27,6 @@ TODO:
         * word cases: 'you’re', cop's, "won\'t", "couldn’t"
     * weight everything for an overall score?
     * generate x and then only take top y?
-* ERRORS
-    * how to handle problems with writing (i.e. word not in vowels, not in syllapy dictionary)
 * display poem on the screen
     * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
 * incorporate more creativity theory from class
@@ -55,7 +56,8 @@ class Tanka():
     def __init__(self):
         """
         Initializes a Tanka object with 5 lines (since it's a 5 line poem with a 5-7-5-7-7 syllable pattern),
-        a last_words tuple, a ngrams dictionary, and an all_words list.
+        a last_words tuple, a bigrams dictionary, an all_words list, an emotions dictionary, a grammar_score,
+        an understandability score, and an understandability category.
         Args: 
             None
         Return:
@@ -69,10 +71,10 @@ class Tanka():
         self.last_words = ()
         self.bigrams = dict()
         self.all_words = []
-        self.pos_tags = []
         self.emotions = dict()
         self.grammar_score = 0
         self.understandability_score = 0
+        self.understandability_category = ""
         
     def read_files(self, input_dir):
         """
@@ -87,13 +89,20 @@ class Tanka():
                 poem_words = []
                 for word in f.read().split():
                     prep_word = word.lower().replace("&", "and").replace("--", "")
+                    
+                    #removes punctuation (except ' and -)
                     exclude = string.punctuation.replace("'", "").replace("-", "")
-                    table = str.maketrans('', '', exclude) #removes punctuation (except ' and -)
+                    table = str.maketrans('', '', exclude)
                     cleaned_word = prep_word.translate(table)
-                    num_free_word = re.sub(r"(\d+)", lambda x: num2words.num2words(int(x.group(0))), cleaned_word) #replaces numbers with their words
+
+                    #replaces numbers with their words
+                    num_free_word = re.sub(r"(\d+)", lambda x: num2words.num2words(int(x.group(0))), cleaned_word) 
+                    
                     if num_free_word not in self.all_words:
                         self.all_words.append(num_free_word)
+
                     poem_words.append(num_free_word)
+
                 self.create_bigrams(poem_words)
 
     def create_bigrams(self, words):
@@ -331,6 +340,23 @@ class Tanka():
             understandability (float): the flesch reading ease score
         """
         self.understandability_score = textstat.flesch_reading_ease(poem)
+
+        #categorize the score into the different Flesch Reading Ease Score categories
+        if self.understandability_score >= 90:
+            self.understandability_category = "Very Easy"
+        elif 80 <= self.understandability_score <= 89:
+            self.understandability_category = "Easy"
+        elif 70 <= self.understandability_score <= 79:
+            self.understandability_category = "Fairly Easy"
+        elif 60 <= self.understandability_score <= 69:
+            self.understandability_category = "Standard"
+        elif 50 <= self.understandability_score <= 59:
+            self.understandability_category = "Fairly Difficult"
+        elif 30 <= self.understandability_score <= 49:
+            self.understandability_category = "Difficult"
+        else:
+            self.understandability_category = "Very Confusing" # <= 29
+
         return self.understandability_score
     
     def evaluate_overall_score(self):
@@ -355,13 +381,13 @@ class Tanka():
         with open(output_path, "w", encoding='utf-8') as f:
             f.write("Emotions: " + str(self.emotions) + "\n")
             f.write("Grammar: " + str(self.grammar_score) + "\n")
-            f.write("Understandability: " + str(self.understandability_score) + "\n")
+            f.write("Understandability: " + str(self.understandability_score) + " (" + self.understandability_category + ") \n")
     
 def main():
     t = Tanka()
     t.read_files("input/*")
     t.export_pos_tags()
-    #p = t.write_tanka()
+    p = t.write_tanka()
     print(t.line_1)
     print(t.line_2)
     print(t.line_3)
@@ -373,11 +399,11 @@ def main():
     print(t.syllables(t.line_3))
     print(t.syllables(t.line_4))
     print(t.syllables(t.line_5))
-    """t.export_poem()
+    t.export_poem()
     t.evaluate_emotions(p)
     t.evaluate_understandability(p)
     t.evaluate_grammar(p)
-    t.export_metrics()"""
+    t.export_metrics()
 
 if __name__ == "__main__":
     main()
