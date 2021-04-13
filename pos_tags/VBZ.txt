@@ -1,1 +1,1 @@
-'comes' | 'is' | 'says' | 'does' | 'has' | 'holds' | 'adds' | 'makes' | 'wants' | 'gives' | 'owns' | 'gets' | 'carries' | 'faces' | 'seems' | 'is' | 
+'comes' | 'is' | 'says' | 'does' | 'has' | 'holds' | 'adds' | 'makes' | 'wants' | 'gives' | 'owns' | 'gets' | 'carries' | 'faces' | 'seems' | 

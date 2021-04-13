@@ -1,1 +1,1 @@
-'can' | 'will' | 'could' | 'can' | 'can' | 'would' | 'should' | 'must' | 'might' | 'shall' | 'may' | 'ca' | 'wo' | 
+'can' | 'will' | 'could' | 'can' | 'can' | 'would' | 'should' | 'must' | 'might' | 'shall' | 'may' | 

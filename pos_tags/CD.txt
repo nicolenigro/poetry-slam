@@ -1,1 +1,1 @@
-'one' | 'two' | 'billion' | '“' | 'eight' | 'three' | 'four' | 'five' | 'million' | '“' | 'seven' | 'nine'
+'one' | 'two' | 'two' | 'billion' | '“' | 'one' | 'eight' | 'three' | 'one' | 'four' | 'one' | 'two' | 'five' | 'eight' | 'one' | 'five' | 'one' | 'million' | '“' | 'seven' | 'two' | 'one' | 'one' | 'two' | 'eight' | 'nine' | 'one' | 
