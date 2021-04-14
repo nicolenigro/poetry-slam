@@ -2,7 +2,7 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/13/21
+4/14/21
 
 Generates and evaluates poems in the tanka form.
 
@@ -10,7 +10,8 @@ Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textsta
 
 TODO - code: 
 * ERRORS/FIXES
-    * change the while loops??
+    * have it so tanka is generated every run, no errors
+        * write it THEN edit it?
     * implement handling verbs for first 2 lines
     * evaluate_grammar() on different sections of the poem?
 * 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
@@ -97,9 +98,8 @@ class Tanka():
                 for word in f.read().split():
                     prep_word = word.lower().replace("&", "and").replace("--", " ").replace("’", "").replace("“", "").replace("”", "")
 
+                    #removes punctuation except for -
                     exclude = string.punctuation.replace("-", "")
-
-                    #removes punctuation
                     table = str.maketrans('', '', exclude)
                     cleaned_word = prep_word.translate(table)
 
