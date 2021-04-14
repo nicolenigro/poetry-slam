@@ -346,10 +346,10 @@ class Tanka():
             s = tree_struc
             wrong_syntax = 0 
             self.grammar_score += 1
-            print("Correct Grammer !!!")
+            print("Correct Grammar!!! :)")
             print(str(s))
         if wrong_syntax == 1:
-            print("Wrong Grammer!!!!")
+            print("Wrong Grammar!!!! :(")
 
     def evaluate_understandability(self, poem):
         """
@@ -402,7 +402,7 @@ def main():
     ready = False
 
     #generate tankas until there is one that is understandable enough
-    """while not ready:
+    while not ready:
         p = t.write_tanka()
         t.evaluate_emotions(p)
         t.evaluate_grammar(p)
@@ -416,7 +416,7 @@ def main():
             print(t.line_3.strip())
             print(t.line_4.strip())
             print(t.line_5.strip())
-            ready = True"""
+            ready = True
 
 if __name__ == "__main__":
     main()
