@@ -7,49 +7,20 @@ Nicole Nigro
 Generates and evaluates poems in the tanka form.
 
 Dependencies: nltk, glob, os, random, re, string, num2words, syllapy, text2emotion, textstat
-"""
 
-"""
 TODO - code: 
 * FIXES/ERRORS
     * evaluate_grammar() on different sections of the poem?
     * Grammar does not cover some of the input words: "'dark-detained' , 'reveries'
-* IMPLEMENT
-    * edit_tanka()
-        * 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
-        * implement handling verbs for first 2 lines
-        * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
-        * have final 2 lines express a profound transcendental meaning that prompts reflection
-            * make a connection that is just enough distinct that the reader is familiar with
-            * Beale
-        * Conceptual knowledge base
-            * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * edit for style
-* incorporate more creativity theory from class into algorithms and documentation
 
 TODO - not code:
 * README
-    * Title: Tanka Artful Generator for Knowledgable Artifacts (TAGKA);  System for Novel T
-        * Poetic Grammatical Meaningful
-        *  T A Novel Grammatical Generator of Tanka Artifacts (TANGTA)
-    * Description
     * Challenges
-    * Scholarly paper and their inspo 
 * VIDEO
     * video file of your system generating, evaluating, and performing a new poetry piece live.
     * Bonus points will be awarded if you have an audience reacting to what your system generates live.
         * If you do this, it should be clear what the system says, and what the follow-up reaction by the audience is.
-
-TANKA INFO
-- Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
-- In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
-a tanka to a woman the day after a date, and she would reply in kind. These were short messages (like secret letters) expressing love,
-desire, meaning, or gratitude.
-- Because tanka poems are meant to be given to someone, they are written from the viewpoint of the poet. That does not mean they must be
-written in the first person, but the poet is ever-present, always writing to express personal feelings about the subject.
-- In terms of content, the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood.
-Traditionally, tanka has addressed a limited number of themes, from seasons to love to travel to death, but contemporary tanka has
-tackled a much wider range of topics within the age-old form.
 """
 
 import nltk
@@ -252,51 +223,6 @@ class Tanka():
 
         else: 
             pass
-
-        """else:
-            if self.syllables(self.line_1) != 5:
-                if self.syllables(self.line_1) > 5:
-                    shortened_line = ' '.join(self.line_1.split(' ')[:-1]) + " "
-                    if self.syllables(shortened_line) == 5:
-                        self.line_1 = shortened_line
-                    else:
-                        #CHOOSE A SYNONYM THAT FITS 
-                        pass
-                else:
-                    pass
-            if self.syllables(self.line_2) != 7:
-                pass
-            if self.syllables(self.line_3) != 5:
-                pass
-            if self.syllables(self.line_4) != 7:
-                pass
-            if self.syllables(self.line_5) != 7:
-                pass
-
-            self.syllable_pattern = "standard 5-7-5-7-7" """
-
-        """
-        #check that there's a verb in the first 2 lines so that they address the experience of the poet
-        first_2_lines = self.line_1 + " " + self.line_2
-        first_2_lines_tags = pos_tag(word_tokenize(first_2_lines))
-        has_verb = False
-
-        for tag in first_2_lines_tags:
-            if "VB" in tag or "VBG" in tag or "VBD" in tag or "VBN" in tag or "VBP" in tag or "VBZ" in tag or "MD" in tag:
-                has_verb = True
-                break
-        
-        if has_verb == False:
-            pass
-
-        while self.syllables(self.line_3) != 5:
-            next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_3) + self.syllables(next_word)) <= 5:
-                self.line_3 += next_word + " "
-                current_pair = (current_pair[1], next_word)
-            else: 
-                self.line_3 = ' '.join(self.line_3.split(' ')[:-1]) + " "
-        """
     
     def write_tanka(self):
         """
@@ -451,7 +377,7 @@ def main():
         t.evaluate_grammar(p)
         t.evaluate_understandability(p)
         if t.understandability_score >= 60.0 and t.syllable_pattern != "":
-            #t.perform_poem(p)
+            t.perform_poem(p)
             t.export_poem()
             t.export_metrics()
             print(t.line_1.strip())
