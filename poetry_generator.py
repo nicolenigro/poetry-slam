@@ -12,6 +12,7 @@ TODO - code:
 * ERRORS/FIXES
     * change the while loops??
     * implement handling verbs for first 2 lines
+    * evaluate_grammar() on different sections of the poem?
 * 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
@@ -41,8 +42,6 @@ Third line is a turn/pivotal image, which marks the transition from the examinat
 In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
 a tanka to a woman the day after a date, and she would reply in kind. These were short messages (like secret letters) expressing love,
 desire, meaning, or gratitude.
-
-These poems often culminated in a transcendental message.
 
 Because tanka poems are meant to be given to someone, they are written from the viewpoint of the poet. That does not mean they must be
 written in the first person, but the poet is ever-present, always writing to express personal feelings about the subject.
