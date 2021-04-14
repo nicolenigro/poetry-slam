@@ -2,7 +2,7 @@
 M6: Poetry Slam
 CSCI 3725
 Nicole Nigro
-4/12/21
+4/13/21
 
 Generates and evaluates poems in the tanka form.
 
@@ -10,13 +10,8 @@ Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textsta
 
 TODO - code: 
 * ERRORS/FIXES
-    * how to handle problems with writing (i.e. word not in vowels, not in syllapy dictionary)
-    * syllables may say 5 but it isn't 5
     * change the while loops??
-    * update CFG rules -- currently saying wrong for everything :(
-    * words not in grammar: #you’ll #husband's #i’m 
     * implement handling verbs for first 2 lines
-    * change grammar score threshold?
 * 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
     * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
     * have final 2 lines express a profound transcendental meaning that prompts reflection
@@ -24,8 +19,6 @@ TODO - code:
         * Beale
      * Conceptual knowledge base
         * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
-* display poem on the screen
-    * implement Deepmoji: https://medium.com/@b.terryjack/nlp-pre-trained-sentiment-analysis-1eb52a9d742c
 * edit for style
 * incorporate more creativity theory from class into algorithms and documentation
 
@@ -66,7 +59,6 @@ import glob, os, random, re, string, syllapy
 import text2emotion as te
 import textstat
 import num2words
-from nltk import tag
 
 class Tanka():
     def __init__(self):
@@ -104,10 +96,12 @@ class Tanka():
             with open(os.path.join(filename), encoding='utf-8') as f:
                 poem_words = []
                 for word in f.read().split():
-                    prep_word = word.lower().replace("&", "and").replace("--", "")
-                    
+                    prep_word = word.lower().replace("&", "and").replace("--", " ").replace("’", "").replace("“", "").replace("”", "")
+
+                    exclude = string.punctuation.replace("-", "")
+
                     #removes punctuation
-                    table = str.maketrans('', '', string.punctuation)
+                    table = str.maketrans('', '', exclude)
                     cleaned_word = prep_word.translate(table)
 
                     #replaces numbers with their words
@@ -288,11 +282,11 @@ class Tanka():
         """
         output_path = os.path.join("output", "tanka7.txt")
         with open(output_path, "w", encoding='utf-8') as f:
-            f.write(self.line_1 + "\n")
-            f.write(self.line_2 + "\n")
-            f.write(self.line_3 + "\n")
-            f.write(self.line_4 + "\n")
-            f.write(self.line_5)
+            f.write(self.line_1.strip() + "\n")
+            f.write(self.line_2.strip()  + "\n")
+            f.write(self.line_3.strip()  + "\n")
+            f.write(self.line_4.strip()  + "\n")
+            f.write(self.line_5.strip() )
         
     def export_pos_tags(self):
         """
@@ -343,20 +337,19 @@ class Tanka():
         Return:
             None
         """
-        my_grammar = nltk.data.load('file:grammar.cfg')
+        load_grammar = nltk.data.load('file:grammar.cfg')
 
-        for word in poem.split():
-            wrong_syntax = 1
-            word_split = word.split()
-            print("\n\n"+ word)
-            rd_parser = nltk.RecursiveDescentParser(my_grammar)
-            for tree_struc in rd_parser.parse(word_split):
-                s = tree_struc
-                wrong_syntax = 0 
-                self.grammar_score += 1
-                print("Correct Grammar !!! " + str(s))
-            if wrong_syntax == 1:
-                print("Wrong Grammar!!!!")
+        wrong_syntax = 1
+        poem_split = poem.split()
+        rd_parser = nltk.RecursiveDescentParser(load_grammar)
+        for tree_struc in rd_parser.parse(poem_split):
+            s = tree_struc
+            wrong_syntax = 0 
+            self.grammar_score += 1
+            print("Correct Grammer !!!")
+            print(str(s))
+        if wrong_syntax == 1:
+            print("Wrong Grammer!!!!")
 
     def evaluate_understandability(self, poem):
         """
@@ -408,22 +401,22 @@ def main():
 
     ready = False
 
-    #generate tankas until there is one that is grammatical and understandable enough
-    while not ready:
+    #generate tankas until there is one that is understandable enough
+    """while not ready:
         p = t.write_tanka()
         t.evaluate_emotions(p)
         t.evaluate_grammar(p)
         t.evaluate_understandability(p)
-        if t.grammar_score >= 10 and t.understandability_score > 60.0:
+        if t.understandability_score > 60.0:
             t.perform_poem(p)
             t.export_poem()
             t.export_metrics()
-            print(t.line_1)
-            print(t.line_2)
-            print(t.line_3)
-            print(t.line_4)
-            print(t.line_5)
-            ready = True
+            print(t.line_1.strip())
+            print(t.line_2.strip())
+            print(t.line_3.strip())
+            print(t.line_4.strip())
+            print(t.line_5.strip())
+            ready = True"""
 
 if __name__ == "__main__":
     main()

@@ -1,1 +1,1 @@
-'or' | 'and' | 'but' | 'nor' | 'plus' | 
+'or' | 'and' | 'but' | 'nor' | 'or' | 'plus' | 
