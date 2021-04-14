@@ -6,8 +6,10 @@ Nicole Nigro
 
 Generates and evaluates poems in the tanka form.
 
-Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textstat, num2words
+Dependencies: nltk, glob, os, random, re, string, num2words, syllapy, text2emotion, textstat
+"""
 
+"""
 TODO - code: 
 * FIXES/ERRORS
     * evaluate_grammar() on different sections of the poem?
@@ -51,20 +53,20 @@ tackled a much wider range of topics within the age-old form.
 """
 
 import nltk
-from nltk.corpus import wordnet as wn
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-import glob, os, random, re, string, syllapy
+import glob, os, random, re, string
+import num2words
+import syllapy
 import text2emotion as te
 import textstat
-import num2words
 
 class Tanka():
     def __init__(self):
         """
         Initializes a Tanka object with 5 lines (since it's a 5 line poem with a 5-7-5-7-7 syllable pattern),
         a bigrams dictionary, an all_words list, a last_words tuple, a syllable_pattern, an emotions
-        dictionary, a grammar_score, an understandability score, and an understandability category.
+        dictionary, a boolean grammar_correct, an understandability score, and an understandability category.
         Args: 
             None
         Return:
@@ -80,7 +82,7 @@ class Tanka():
         self.last_words = ()
         self.syllable_pattern = ""
         self.emotions = dict()
-        self.grammar_score = 0
+        self.grammar_correct = False
         self.understandability_score = 0
         self.understandability_category = ""
         
@@ -385,10 +387,11 @@ class Tanka():
         for tree_struc in rd_parser.parse(poem_split):
             s = tree_struc
             wrong_syntax = 0 
-            self.grammar_score += 1
+            self.grammar_correct = True
             print("Correct Grammar!!! :)")
             print(str(s))
         if wrong_syntax == 1:
+            self.grammar_correct = False
             print("Wrong Grammar!!!! :(")
 
     def evaluate_understandability(self, poem):
@@ -432,7 +435,7 @@ class Tanka():
         with open(output_path, "w", encoding='utf-8') as f:
             f.write("Syllable Pattern: " + self.syllable_pattern + "\n")
             f.write("Emotions: " + str(self.emotions) + "\n")
-            f.write("Grammar: " + str(self.grammar_score) + "\n")
+            f.write("Grammar Correct: " + str(self.grammar_correct) + "\n")
             f.write("Understandability: " + str(self.understandability_score) + " (" + self.understandability_category + ") \n")
 
 
