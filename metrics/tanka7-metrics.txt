@@ -1,3 +1,0 @@
-Emotions: {'Happy': 0.0, 'Angry': 0.25, 'Surprise': 0.25, 'Sad': 0.25, 'Fear': 0.25}
-Grammar: 0
-Understandability: 70.13 (Fairly Easy) 

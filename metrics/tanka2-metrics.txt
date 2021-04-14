@@ -1,3 +1,4 @@
-Emotions: {'Happy': 0.0, 'Angry': 0.0, 'Surprise': 0.0, 'Sad': 0.25, 'Fear': 0.75}
+Syllable Pattern: standard - 5-7-5-7-7
+Emotions: {'Happy': 0.0, 'Angry': 0.0, 'Surprise': 0.0, 'Sad': 0.0, 'Fear': 1.0}
 Grammar: 0
-Understandability: 75.54
+Understandability: 73.51 (Fairly Easy) 

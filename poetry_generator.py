@@ -9,18 +9,19 @@ Generates and evaluates poems in the tanka form.
 Dependencies: glob, os, random, re, string, syllapy, nltk, text2emotion, textstat, num2words
 
 TODO - code: 
-* ERRORS/FIXES
-    * have it so tanka is generated every run, no errors
-        * write it THEN edit it?
-    * implement handling verbs for first 2 lines
+* FIXES/ERRORS
     * evaluate_grammar() on different sections of the poem?
-* 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
-    * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
-    * have final 2 lines express a profound transcendental meaning that prompts reflection
-        * make a connection that is just enough distinct that the reader is familiar with
-        * Beale
-     * Conceptual knowledge base
-        * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
+    * Grammar does not cover some of the input words: "'dark-detained' , 'reveries'
+* IMPLEMENT
+    * edit_tanka()
+        * 4Ps - PROCESS: What contextual information might inspire your computational poet? How might it move from inspiration to planning to creation?
+        * implement handling verbs for first 2 lines
+        * have the third line (turn/pivot) change the tone of the poem, relating to 2 lines above and below
+        * have final 2 lines express a profound transcendental meaning that prompts reflection
+            * make a connection that is just enough distinct that the reader is familiar with
+            * Beale
+        * Conceptual knowledge base
+            * must convey a conceptual message, meaningful under some interpretation (meaningfulness)
 * edit for style
 * incorporate more creativity theory from class into algorithms and documentation
 
@@ -38,21 +39,19 @@ TODO - not code:
         * If you do this, it should be clear what the system says, and what the follow-up reaction by the audience is.
 
 TANKA INFO
-Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
-
-In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
+- Third line is a turn/pivotal image, which marks the transition from the examination of an image to the examination of the personal response.
+- In its purest form, tanka poems are most commonly written as expressions of gratitude, love, or self-reflection. Suitors would send
 a tanka to a woman the day after a date, and she would reply in kind. These were short messages (like secret letters) expressing love,
 desire, meaning, or gratitude.
-
-Because tanka poems are meant to be given to someone, they are written from the viewpoint of the poet. That does not mean they must be
+- Because tanka poems are meant to be given to someone, they are written from the viewpoint of the poet. That does not mean they must be
 written in the first person, but the poet is ever-present, always writing to express personal feelings about the subject.
-
-In terms of content, the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood.
+- In terms of content, the kami-no-ku and shimo-no-ku tend to make a pair. Tanka is more likely to have transitions in narrative or mood.
 Traditionally, tanka has addressed a limited number of themes, from seasons to love to travel to death, but contemporary tanka has
 tackled a much wider range of topics within the age-old form.
 """
 
 import nltk
+from nltk.corpus import wordnet as wn
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 import glob, os, random, re, string, syllapy
@@ -64,8 +63,8 @@ class Tanka():
     def __init__(self):
         """
         Initializes a Tanka object with 5 lines (since it's a 5 line poem with a 5-7-5-7-7 syllable pattern),
-        a last_words tuple, a bigrams dictionary, an all_words list, an emotions dictionary, a grammar_score,
-        an understandability score, and an understandability category.
+        a bigrams dictionary, an all_words list, a last_words tuple, a syllable_pattern, an emotions
+        dictionary, a grammar_score, an understandability score, and an understandability category.
         Args: 
             None
         Return:
@@ -76,9 +75,10 @@ class Tanka():
         self.line_3 = ""
         self.line_4 = ""
         self.line_5 = ""
-        self.last_words = ()
         self.bigrams = dict()
         self.all_words = []
+        self.last_words = ()
+        self.syllable_pattern = ""
         self.emotions = dict()
         self.grammar_score = 0
         self.understandability_score = 0
@@ -161,59 +161,40 @@ class Tanka():
             next_word = self.all_words[word_index]
         return next_word
     
-    def write_kaminoku(self, current_pair):
+    def write_kaminoku(self):
         """
         Writes the first 3 parts of a tanka in 5-7-5 syllable pattern.
-        Arg:
-            current_pair (tuple): the current pair of words used to start writing the kami-no-ku
+        Args:
+            None
         Return:
             None
         """
+        ready = False
+
+        while not ready:
+            start_index = random.randint(0, len(self.bigrams)-1)
+            current_pair = tuple(list(self.bigrams)[start_index])
+
+            #first word shouldn't be an article because they reduce poetic compression and weaken the poetic impact of the form
+            if pos_tag(word_tokenize(current_pair[0]))[0][1] != "DT" and self.syllables(str(current_pair)) <= 5:
+                ready = True
+
         self.line_1 += current_pair[0] + " " + current_pair[1] + " "
 
-        while self.syllables(self.line_1) != 5:
+        while self.syllables(self.line_1) < 5:
             next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_1) + self.syllables(next_word)) <= 5:
-                self.line_1 += next_word + " "
-                current_pair = (current_pair[1], next_word)
-            else: 
-                self.line_1 = ' '.join(self.line_1.split(' ')[:-1]) + " "
-        
-        print("line 1 done: " + self.line_1)
-        
-        while self.syllables(self.line_2) != 7:
+            self.line_1 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+
+        while self.syllables(self.line_2) < 7:
             next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_2) + self.syllables(next_word)) <= 7:
-                self.line_2 += next_word + " "
-                current_pair = (current_pair[1], next_word)
-            else: 
-                self.line_2 = ' '.join(self.line_2.split(' ')[:-1]) + " "
-        
-        print("line 2 done: " + self.line_2)
+            self.line_2 += next_word + " "
+            current_pair = (current_pair[1], next_word)
 
-        #check that there's a verb in the first 2 lines so that they address the experience of the poet
-        first_2_lines = self.line_1 + " " + self.line_2
-        first_2_lines_tags = pos_tag(word_tokenize(first_2_lines))
-        has_verb = False
-
-        for tag in first_2_lines_tags:
-            if "VB" in tag or "VBG" in tag or "VBD" in tag or "VBN" in tag or "VBP" in tag or "VBZ" in tag or "MD" in tag:
-                has_verb = True
-                break
-        
-        if has_verb == False:
-            #TODO
-            pass
-
-        while self.syllables(self.line_3) != 5:
+        while self.syllables(self.line_3) < 5:
             next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_3) + self.syllables(next_word)) <= 5:
-                self.line_3 += next_word + " "
-                current_pair = (current_pair[1], next_word)
-            else: 
-                self.line_3 = ' '.join(self.line_3.split(' ')[:-1]) + " "
-        
-        print("line 3 done: " + self.line_3)
+            self.line_3 += next_word + " "
+            current_pair = (current_pair[1], next_word)
         
         self.last_words = current_pair
 
@@ -227,26 +208,94 @@ class Tanka():
         """
         current_pair = self.last_words
 
-        while self.syllables(self.line_4) != 7:
+        while self.syllables(self.line_4) < 7:
             next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_4) + self.syllables(next_word)) <= 7:
-                self.line_4 += next_word + " "
+            self.line_4 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+        
+        while self.syllables(self.line_5) < 7:
+            next_word = self.get_next_word(current_pair)
+            self.line_5 += next_word + " "
+            current_pair = (current_pair[1], next_word)
+
+    def edit_tanka(self):
+        """
+        After having a rough draft of the tanka, edit to make sure it fits a tanka syllable pattern and the key
+        components of a tanka; writing a tanka is an iterative process.
+        Args:
+            None
+        Return:
+            None
+        """
+        #check if the tanka follows a special syllable pattern
+        if self.syllables(self.line_1) == 5 and self.syllables(self.line_2) == 7 and self.syllables(self.line_3) == 5 and \
+            self.syllables(self.line_4) == 8 and self.syllables(self.line_5) == 7:
+            self.syllable_pattern = "ji-amari (exceeds the typical syllable count) - 5-7-5-8-7"
+
+        elif self.syllables(self.line_1) == 5 and self.syllables(self.line_2) == 7 and self.syllables(self.line_3) == 5 and \
+            self.syllables(self.line_4) == 7 and self.syllables(self.line_5) == 6:
+            self.syllable_pattern = "ji-tarazu (runs short) - 5-7-5-7-6"
+
+        elif self.syllables(self.line_1) == 5 and self.syllables(self.line_2) == 7 and self.syllables(self.line_3) == 5 and \
+            self.syllables(self.line_4) == 9 and self.syllables(self.line_5) == 5:
+            self.syllable_pattern = "ku-ware (splitting) - 5-7-5-9-5"
+
+        elif self.syllables(self.line_1) == 8 and self.syllables(self.line_2) == 4 and self.syllables(self.line_3) == 5 and \
+            self.syllables(self.line_4) == 7 and self.syllables(self.line_5) == 7:
+            self.syllable_pattern = "ku-matagari (straddling) - 8-4-5-7-7"
+        
+        elif self.syllables(self.line_1) == 5 and self.syllables(self.line_2) == 7 and self.syllables(self.line_3) == 5 and \
+            self.syllables(self.line_4) == 7 and self.syllables(self.line_5) == 7:
+            self.syllable_pattern = "standard - 5-7-5-7-7" 
+
+        else: 
+            pass
+
+        """else:
+            if self.syllables(self.line_1) != 5:
+                if self.syllables(self.line_1) > 5:
+                    shortened_line = ' '.join(self.line_1.split(' ')[:-1]) + " "
+                    if self.syllables(shortened_line) == 5:
+                        self.line_1 = shortened_line
+                    else:
+                        #CHOOSE A SYNONYM THAT FITS 
+                        pass
+                else:
+                    pass
+            if self.syllables(self.line_2) != 7:
+                pass
+            if self.syllables(self.line_3) != 5:
+                pass
+            if self.syllables(self.line_4) != 7:
+                pass
+            if self.syllables(self.line_5) != 7:
+                pass
+
+            self.syllable_pattern = "standard 5-7-5-7-7" """
+
+        """
+        #check that there's a verb in the first 2 lines so that they address the experience of the poet
+        first_2_lines = self.line_1 + " " + self.line_2
+        first_2_lines_tags = pos_tag(word_tokenize(first_2_lines))
+        has_verb = False
+
+        for tag in first_2_lines_tags:
+            if "VB" in tag or "VBG" in tag or "VBD" in tag or "VBN" in tag or "VBP" in tag or "VBZ" in tag or "MD" in tag:
+                has_verb = True
+                break
+        
+        if has_verb == False:
+            pass
+
+        while self.syllables(self.line_3) != 5:
+            next_word = self.get_next_word(current_pair)
+            if (self.syllables(self.line_3) + self.syllables(next_word)) <= 5:
+                self.line_3 += next_word + " "
                 current_pair = (current_pair[1], next_word)
             else: 
-                self.line_4 = ' '.join(self.line_4.split(' ')[:-1]) + " "
-        
-        print("line 4 done: " + self.line_4)
-        
-        while self.syllables(self.line_5) != 7:
-            next_word = self.get_next_word(current_pair)
-            if (self.syllables(self.line_5) + self.syllables(next_word)) <= 7:
-                self.line_5 += next_word + " "
-                current_pair = (current_pair[1], next_word)
-            else: 
-                self.line_5 = ' '.join(self.line_5.split(' ')[:-1]) + " "
-        
-        print("line 5 done")
-                
+                self.line_3 = ' '.join(self.line_3.split(' ')[:-1]) + " "
+        """
+    
     def write_tanka(self):
         """
         Writes a complete tanka, consisting of the kami-no-ku and shimo-no-ku.
@@ -255,17 +304,9 @@ class Tanka():
         Return:
             poem (str): the 5-line tanka
         """
-        ready = False
-
-        while not ready:
-            start_index = random.randint(0, len(self.bigrams)-1)
-            start_pair = tuple(list(self.bigrams)[start_index])
-
-            #first word shouldn't be an article because they reduce poetic compression and weaken the poetic impact of the form
-            if pos_tag(word_tokenize(start_pair[0]))[0][1] != "DT" and self.syllables(str(start_pair)) <= 5:
-                self.write_kaminoku(start_pair)
-                self.write_shimonoku()
-                ready = True
+        self.write_kaminoku()
+        self.write_shimonoku()
+        self.edit_tanka()
 
         poem = self.line_1 + self.line_2 + self.line_3 + self.line_4 + self.line_5
 
@@ -279,13 +320,13 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "tanka7.txt")
+        output_path = os.path.join("output", "tanka2.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1.strip() + "\n")
             f.write(self.line_2.strip()  + "\n")
             f.write(self.line_3.strip()  + "\n")
             f.write(self.line_4.strip()  + "\n")
-            f.write(self.line_5.strip() )
+            f.write(self.line_5.strip())
         
     def export_pos_tags(self):
         """
@@ -387,27 +428,27 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("metrics", "tanka7-metrics.txt")
+        output_path = os.path.join("metrics", "tanka2-metrics.txt")
         with open(output_path, "w", encoding='utf-8') as f:
+            f.write("Syllable Pattern: " + self.syllable_pattern + "\n")
             f.write("Emotions: " + str(self.emotions) + "\n")
             f.write("Grammar: " + str(self.grammar_score) + "\n")
             f.write("Understandability: " + str(self.understandability_score) + " (" + self.understandability_category + ") \n")
 
 
 def main():
-    t = Tanka()
-    t.read_files("input/*")
-
     ready = False
 
-    #generate tankas until there is one that is understandable enough
+    #generate tankas until there is one that iss understandable enough and follows one of the syllable patterns
     while not ready:
+        t = Tanka()
+        t.read_files("input/*")
         p = t.write_tanka()
         t.evaluate_emotions(p)
         t.evaluate_grammar(p)
         t.evaluate_understandability(p)
-        if t.understandability_score > 60.0:
-            t.perform_poem(p)
+        if t.understandability_score >= 60.0 and t.syllable_pattern != "":
+            #t.perform_poem(p)
             t.export_poem()
             t.export_metrics()
             print(t.line_1.strip())
