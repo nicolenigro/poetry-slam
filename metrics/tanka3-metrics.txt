@@ -1,0 +1,4 @@
+Syllable Pattern: ji-amari (exceeds the typical syllable count) - 5-7-5-8-7
+Emotions: {'Happy': 0.0, 'Angry': 0.0, 'Surprise': 0.33, 'Sad': 0.0, 'Fear': 0.67}
+Grammar Correct: False
+Understandability: 67.08 (Standard) 
