@@ -9,11 +9,6 @@ Generates and evaluates poems in the tanka form.
 Dependencies: nltk, glob, os, random, re, string, num2words, syllapy, text2emotion, textstat
 
 TODO:
-* README
-    * Challenges - How working on this system challenged you as a computer scientist
-        * The student challenged themselves to gain significant skills and experience which will likely be useful for the future.
-    * review and edit it
-    * The system is not only different from everyone else's, but is strikingly unique, and meaningful to the individual who made it.
 * VIDEO
     * video file of your system generating, evaluating, and performing a new poetry piece live.
     * Bonus points will be awarded if you have an audience reacting to what your system generates live.
