@@ -2,17 +2,11 @@
 Nicole Nigro
 CSCI 3725
 M6: Poetry Slam
-4/14/21
+4/16/21
 
 Generates and evaluates poems in the tanka form.
 
 Dependencies: nltk, glob, os, random, re, string, num2words, syllapy, text2emotion, textstat
-
-TODO:
-* VIDEO
-    * video file of your system generating, evaluating, and performing a new poetry piece live.
-    * Bonus points will be awarded if you have an audience reacting to what your system generates live.
-        * If you do this, it should be clear what the system says, and what the follow-up reaction by the audience is.
 """
 
 
@@ -248,7 +242,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("output", "6.txt")
+        output_path = os.path.join("output", "tanka5.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write(self.line_1.strip() + "\n")
             f.write(self.line_2.strip()  + "\n")
@@ -357,7 +351,7 @@ class Tanka():
         Return:
             None
         """
-        output_path = os.path.join("metrics", "tanka6-metrics.txt")
+        output_path = os.path.join("metrics", "tanka5-metrics.txt")
         with open(output_path, "w", encoding='utf-8') as f:
             f.write("Syllable Pattern: " + self.syllable_pattern + "\n")
             f.write("Emotions: " + str(self.emotions) + "\n")
